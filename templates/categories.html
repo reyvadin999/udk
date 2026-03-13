@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Categories | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-3xl font-bold text-white">Equipment Categories</h1>
+        <p class="text-gray-400 mt-1">Classify gear and set default lifespans.</p>
+    </div>
+    <a href="{{ url_for('category_add') }}" class="px-6 py-3 bg-primary-500 hover:bg-primary-400 text-white rounded-xl transition shadow-lg shadow-primary-500/20 font-semibold">
+        + New Category
+    </a>
+</div>
+
+<div class="glass rounded-2xl overflow-hidden border border-white/10 shadow-2xl max-w-4xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead class="bg-white/5 border-b border-white/10">
+                <tr>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Category Name</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Default Lifespan</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 text-gray-300">
+                {% for c in categories %}
+                <tr class="hover:bg-white/5 transition">
+                    <td class="px-6 py-4 font-medium text-white">{{ c.name }}</td>
+                    <td class="px-6 py-4">
+                        {% if c.default_lifespan_years %}
+                            <span class="text-white font-semibold">{{ c.default_lifespan_years }}</span> <span class="text-gray-500 text-sm italic">years</span>
+                        {% else %}
+                            <span class="text-gray-500 italic">No fixed lifespan</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="2" class="px-6 py-12 text-center text-gray-500 italic">
+                        No categories defined yet. Start by adding one above.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Return Equipment | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex items-center space-x-4">
+    <a href="{{ url_for('dashboard') }}" class="text-gray-400 hover:text-white transition">&larr; Back</a>
+    <h1 class="text-3xl font-bold text-white">Return Equipment (Check In)</h1>
+</div>
+
+<div class="glass rounded-2xl p-8 max-w-2xl mx-auto shadow-xl ring-1 ring-primary-500/30">
+    <div class="mb-8 p-4 bg-dark-900/50 rounded-xl border border-white/5 space-y-2">
+        <h2 class="text-lg font-bold text-white mb-4 border-b border-white/10 pb-2">Transaction Details</h2>
+        <p class="text-gray-300"><span class="text-gray-500 text-sm uppercase tracking-wider block w-24 inline-block">Climber:</span> <strong class="text-white">{{ tx.user.username }}</strong></p>
+        <p class="text-gray-300"><span class="text-gray-500 text-sm uppercase tracking-wider block w-24 inline-block">Item:</span> <strong class="text-white">{{ tx.gear.name }}</strong></p>
+        <p class="text-gray-300"><span class="text-gray-500 text-sm uppercase tracking-wider block w-24 inline-block">Activity:</span> {{ tx.activity_name }}</p>
+        <p class="text-gray-300"><span class="text-gray-500 text-sm uppercase tracking-wider block w-24 inline-block">Out Cond:</span> <em class="text-gray-400">{{ tx.condition_out or 'No notes provided going out.' }}</em></p>
+    </div>
+
+    <form method="POST" action="{{ url_for('checkin', tx_id=tx.id) }}" class="space-y-6">
+        
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">Condition Upon Return <span class="text-rose-400 text-xs">*Required</span></label>
+            <textarea name="condition_in" required rows="3" placeholder="Describe the condition of the gear now. Any core shots? Sticky cam lobes?..."
+                class="block w-full px-4 py-3 bg-dark-900/50 border border-white/10 rounded-xl shadow-inner text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition"></textarea>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">New Gear Status</label>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="new_gear_status" value="AVAILABLE" class="peer sr-only" checked>
+                    <div class="rounded-xl border border-white/10 px-3 py-3 text-center peer-checked:bg-green-500/20 peer-checked:border-green-500/50 peer-checked:text-green-400 hover:bg-white/5 transition h-full text-[11px] font-bold text-gray-500 flex items-center justify-center uppercase tracking-tighter">
+                        Available
+                    </div>
+                </label>
+                
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="new_gear_status" value="MAINTENANCE" class="peer sr-only">
+                    <div class="rounded-xl border border-white/10 px-3 py-3 text-center peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 peer-checked:text-yellow-500 hover:bg-white/5 transition h-full text-[11px] font-bold text-gray-500 flex items-center justify-center uppercase tracking-tighter">
+                        Maintenance
+                    </div>
+                </label>
+                
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="new_gear_status" value="LOST" class="peer sr-only">
+                    <div class="rounded-xl border border-white/10 px-3 py-3 text-center peer-checked:bg-gray-500/20 peer-checked:border-gray-500/50 peer-checked:text-gray-400 hover:bg-white/5 transition h-full text-[11px] font-bold text-gray-500 flex items-center justify-center uppercase tracking-tighter">
+                        Lost / Defect
+                    </div>
+                </label>
+                
+                {% if current_user.is_admin_or_manager %}
+                <label class="cursor-pointer relative">
+                    <input type="radio" name="new_gear_status" value="RETIRED" class="peer sr-only">
+                    <div class="rounded-xl border border-white/10 px-3 py-3 text-center peer-checked:bg-rose-500/20 peer-checked:border-rose-500/50 peer-checked:text-rose-500 hover:bg-white/5 transition h-full text-[11px] font-bold text-gray-500 flex items-center justify-center uppercase tracking-tighter">
+                        Retire
+                    </div>
+                </label>
+                {% endif %}
+            </div>
+            <p class="text-[10px] text-gray-500 mt-3 text-center uppercase tracking-widest px-8">Be honest about the condition. Safety depends on accurate reporting.</p>
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-white/10 flex justify-end">
+            <button type="submit" 
+                class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 hover:to-teal-400 text-white rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] transition transform hover:-translate-y-0.5 font-bold text-lg">
+                Complete Check In
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

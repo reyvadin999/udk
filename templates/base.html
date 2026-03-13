@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UDK Mezun Tracker{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        dark: {
+                            900: '#0f172a', /* deep slate */
+                            800: '#1e293b',
+                            700: '#334155'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .glass {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-[url('https://images.unsplash.com/photo-1522163182402-834f871fd851?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center bg-fixed bg-no-repeat relative">
+    <div class="absolute inset-0 bg-dark-900/80 z-0"></div> <!-- Overlay -->
+    
+    <div class="relative z-10 flex flex-col min-h-screen">
+        <!-- Navbar -->
+        {% if current_user.is_authenticated %}
+        <nav class="glass border-b border-white/10 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ url_for('dashboard') }}" class="text-2xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent transform hover:scale-105 transition">
+                            🏔️ UDK Mezun
+                        </a>
+                        <div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-4">
+                                <a href="{{ url_for('dashboard') }}" class="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition">Dashboard</a>
+                                <a href="{{ url_for('gear_list') }}" class="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition">Equipment</a>
+                                {% if current_user.is_admin_or_manager %}
+                                <a href="{{ url_for('checkout') }}" class="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition">Checkout</a>
+                                <a href="{{ url_for('safety_alerts') }}" class="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-3 py-2 rounded-md text-sm font-medium transition">Alerts</a>
+                                <a href="{{ url_for('audit_log') }}" class="text-gray-300 hover:text-white hover:bg-white/10 px-3 py-2 rounded-md text-sm font-medium transition">Audit</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="text-sm text-gray-400 mr-4">Hi, <a href="{{ url_for('profile') }}" class="hover:underline"><strong class="text-white">{{ current_user.username }}</strong></a> ({{ current_user.role }})</span>
+                        <a href="{{ url_for('profile') }}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition border border-white/10 mr-2">Profile</a>
+                        <a href="{{ url_for('logout') }}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 bg-red-500/20 hover:bg-red-500/40 rounded-lg transition border border-red-500/30">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+
+        <!-- Flash Messages -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="p-4 rounded-xl mb-4 text-sm font-medium glass animate-fade-in
+                    {% if category == 'error' %} border-red-500/50 text-red-200 bg-red-900/40
+                    {% elif category == 'success' %} border-green-500/50 text-green-200 bg-green-900/40
+                    {% else %} border-primary-500/50 text-primary-200 bg-primary-900/40 {% endif %}">
+                      {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full animate-fade-in">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="glass border-t border-white/10 py-6 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
+                &copy; {{ now.year }} UDK Mezun Tracker. Designed for Safety & Accountability.
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

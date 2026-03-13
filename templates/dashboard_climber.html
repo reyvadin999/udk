@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="mb-8 border-b border-white/10 pb-6">
+    <h1 class="text-3xl font-bold text-white">Climber Dashboard</h1>
+    <p class="text-gray-400 mt-2">Welcome back. Here are your current checkouts.</p>
+</div>
+
+<div class="glass rounded-2xl p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-white">Items You Are Responsible For</h2>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('checkin_bulk') }}" class="px-4 py-2 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-lg transition text-sm font-medium border border-teal-500/30">Return Multiple Items</a>
+            <a href="{{ url_for('checkout') }}" class="px-4 py-2 bg-primary-500 hover:bg-primary-400 text-white rounded-lg transition text-sm font-medium">+ Checkout Gear</a>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for tx in active_checkouts %}
+        <div class="bg-white/5 rounded-xl p-5 border border-white/10 hover:bg-white/10 transition group relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-3">
+                <span class="bg-teal-500/20 text-teal-400 px-2 py-1 rounded-full text-xs font-semibold ring-1 ring-teal-500/50 flex align-center items-center gap-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></div>
+                    Active
+                </span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-1 w-3/4 truncate" title="{{ tx.gear.name }}">{{ tx.gear.name }}</h3>
+            <p class="text-sm text-gray-400 mb-4">{{ tx.activity_name }}</p>
+            
+            <div class="flex flex-col space-y-2 text-sm text-gray-300">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Checkout:</span>
+                    <span>{{ tx.checkout_date.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Due Date:</span>
+                    <span class="font-medium {% if tx.expected_return < now.date() %}text-rose-400{% else %}text-white{% endif %}">
+                        {{ tx.expected_return }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-white/10 text-right">
+                <a href="{{ url_for('checkin', tx_id=tx.id) }}" class="inline-block px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition border border-white/10">Return Item</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full py-12 text-center text-gray-500 border border-dashed border-white/10 rounded-2xl">
+            You do not have any active checkouts.<br>Click "Checkout Gear" if you need to borrow something.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

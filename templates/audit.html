@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Ledger | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white">Immutable Audit Ledger</h1>
+    <p class="text-gray-400 mt-2">Administrative log of all system state changes.</p>
+</div>
+
+<div class="glass rounded-2xl shadow-xl overflow-hidden border border-white/10">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-300">
+            <thead class="text-xs uppercase bg-white/5 text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-4">Timestamp (UTC)</th>
+                    <th scope="col" class="px-6 py-4">Item ID</th>
+                    <th scope="col" class="px-6 py-4">Action</th>
+                    <th scope="col" class="px-6 py-4">Change</th>
+                    <th scope="col" class="px-6 py-4">Performed By</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for log in logs %}
+                <tr class="hover:bg-white/5 transition font-sans border-b border-white/5">
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-400 font-mono text-xs">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="px-6 py-4 text-primary-400 font-mono text-xs"><a href="{{ url_for('gear_detail', id=log.gear_id) }}" class="hover:underline" title="{{ log.gear.name if log.gear else 'Unknown' }}">{{ log.gear_id[:8] }}...</a></td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-white/10 text-white border border-white/20">{{ log.action }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs">
+                        <div class="flex flex-col space-y-1">
+                            <div><span class="text-gray-500 uppercase text-[10px] font-bold">Old:</span> <span class="text-gray-400 italic">{{ log.old_value or 'None' }}</span></div>
+                            <div><span class="text-teal-500 uppercase text-[10px] font-bold">New:</span> <span class="text-white font-semibold">{{ log.new_value or 'None' }}</span></div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-300">{{ log.performed_by.username if log.performed_by else 'System' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 font-sans">
+                        No audit logs recorded yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

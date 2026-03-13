@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Issue Equipment | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="mb-8 border-b border-white/10 pb-6 flex items-center space-x-4">
+    <a href="{{ url_for('dashboard') }}" class="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition transform hover:-translate-x-1">&larr; Back</a>
+    <div>
+        <h1 class="text-3xl font-bold text-white">Issue Equipment (Check Out)</h1>
+        <p class="text-gray-400 mt-1">Assign gear to a climber for an upcoming activity.</p>
+    </div>
+</div>
+
+<div class="glass rounded-2xl p-8 max-w-3xl shadow-xl border-t border-primary-500/50">
+    <form method="POST" action="{{ url_for('checkout') }}" class="space-y-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Select User -->
+            {% if current_user.is_admin_or_manager %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Select Climber</label>
+                <select name="user_id" required 
+                    class="block w-full px-4 py-3 bg-dark-900 border border-white/10 rounded-xl shadow-inner text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition">
+                    <option value="" disabled selected>-- Choose a Member --</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.username }} ({{ u.role }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% else %}
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Climber</label>
+                <input type="text" disabled value="{{ current_user.username }}" class="block w-full px-4 py-3 bg-dark-900 border border-white/10 rounded-xl shadow-inner text-white opacity-50 cursor-not-allowed">
+            </div>
+            {% endif %}
+
+            <!-- Select Gear -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Select Equipment</label>
+                <div class="block w-full px-4 py-3 bg-dark-900 border border-white/10 rounded-xl shadow-inner text-white h-48 overflow-y-auto space-y-2">
+                    {% for g in available_gear %}
+                    <label class="flex items-center space-x-3 p-2 hover:bg-white/5 rounded-lg cursor-pointer transition">
+                        <input type="checkbox" name="gear_ids" value="{{ g.id }}" class="w-5 h-5 rounded border-white/10 text-primary-500 focus:ring-primary-500 bg-dark-900">
+                        <span class="text-sm">{{ g.name }} <span class="text-gray-500">({{ g.category.name if g.category else 'N/A' }})</span></span>
+                    </label>
+                    {% endfor %}
+                    {% if not available_gear %}
+                    <p class="text-gray-500 text-sm italic">No gear available for checkout.</p>
+                    {% endif %}
+                </div>
+                <p class="mt-2 text-[10px] text-gray-500 uppercase tracking-widest">Select one or more items to issue at once.</p>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Activity Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Activity / Expedition Name</label>
+                <input type="text" name="activity_name" required placeholder="e.g. Aladağlar Fall Training 2026" 
+                    class="block w-full px-4 py-3 bg-dark-900/50 border border-white/10 rounded-xl shadow-inner text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition">
+            </div>
+
+            <!-- Expected Return -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Expected Return Date</label>
+                <input type="date" name="expected_return" required 
+                    class="block w-full px-4 py-3 bg-dark-900/50 border border-white/10 rounded-xl shadow-inner text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition">
+            </div>
+
+            <!-- Pre-Check Condition -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Condition Going Out <span class="text-gray-500 text-xs">(Optional Notes)</span></label>
+                <textarea name="condition_out" rows="3" placeholder="Note any existing wear and tear before it leaves the inventory..."
+                    class="block w-full px-4 py-3 bg-dark-900/50 border border-white/10 rounded-xl shadow-inner text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 transition"></textarea>
+            </div>
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-white/10 flex justify-end">
+            <button type="submit" 
+                class="px-8 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 text-white rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.4)] transition transform hover:-translate-y-0.5 font-bold text-lg">
+                Authorize Checkout
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Return | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="mb-8 border-b border-white/10 pb-6 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+        <a href="{{ url_for('dashboard') }}" class="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-lg transition transform hover:-translate-x-1">&larr; Back</a>
+        <div>
+            <h1 class="text-3xl font-bold text-white">Bulk Equipment Return</h1>
+            <p class="text-gray-400 mt-1">Select multiple items to return to the inventory.</p>
+        </div>
+    </div>
+</div>
+
+<div class="glass rounded-2xl p-8 max-w-4xl shadow-xl border-t border-teal-500/50">
+    <form method="POST" action="{{ url_for('checkin_bulk') }}" class="space-y-6">
+        
+        {% if current_user.is_admin_or_manager %}
+        <div class="mb-8">
+            <label class="block text-sm font-medium text-gray-300 mb-2">Select Climber</label>
+            <select name="user_id" onchange="window.location.href='{{ url_for('checkin_bulk') }}?user_id=' + this.value"
+                class="block w-full px-4 py-3 bg-dark-900 border border-white/10 rounded-xl shadow-inner text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition">
+                <option value="" disabled {{ 'selected' if not selected_user }}>-- Choose a Member to show their items --</option>
+                {% for u in users %}
+                <option value="{{ u.id }}" {{ 'selected' if selected_user and selected_user.id == u.id }}>{{ u.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        {% if active_txs %}
+        <div class="space-y-4">
+            <h2 class="text-xl font-bold text-white">Items Checked Out by {{ selected_user.username if selected_user else current_user.username }}</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="text-xs uppercase bg-white/5 text-gray-300">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 rounded-tl-lg w-10">
+                                <input type="checkbox" onclick="toggleAll(this)" class="w-5 h-5 rounded border-white/10 text-teal-500 focus:ring-teal-500 bg-dark-900">
+                            </th>
+                            <th scope="col" class="px-4 py-3">Item</th>
+                            <th scope="col" class="px-4 py-3">Activity</th>
+                            <th scope="col" class="px-4 py-3">Out Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in active_txs %}
+                        <tr class="border-b border-white/10 hover:bg-white/5 transition">
+                            <td class="px-4 py-3">
+                                <input type="checkbox" name="tx_ids" value="{{ tx.id }}" class="tx-checkbox w-5 h-5 rounded border-white/10 text-teal-500 focus:ring-teal-500 bg-dark-900">
+                            </td>
+                            <td class="px-4 py-3 font-medium text-white">{{ tx.gear.name }}</td>
+                            <td class="px-4 py-3">{{ tx.activity_name }}</td>
+                            <td class="px-4 py-3">{{ tx.checkout_date.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Condition Upon Return <span class="text-rose-400 text-xs">*Required for all</span></label>
+                    <textarea name="condition_in" required rows="3" placeholder="Describe the condition of the selected gear..."
+                        class="block w-full px-4 py-3 bg-dark-900/50 border border-white/10 rounded-xl shadow-inner text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Set Status for All</label>
+                    <select name="new_gear_status" class="block w-full px-4 py-3 bg-dark-900 border border-white/10 rounded-xl shadow-inner text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                        <option value="AVAILABLE">AVAILABLE</option>
+                        <option value="MAINTENANCE">MAINTENANCE</option>
+                        <option value="LOST">LOST / DEFECT</option>
+                        {% if current_user.is_admin_or_manager %}<option value="RETIRED">RETIRED</option>{% endif %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-white/10 flex justify-end">
+                <button type="submit" 
+                    class="px-8 py-3 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-500 text-white rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] transition transform hover:-translate-y-0.5 font-bold text-lg">
+                    Check In Selected Items
+                </button>
+            </div>
+        </div>
+        {% elif selected_user or not current_user.is_admin_or_manager %}
+        <div class="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/10">
+            <p class="text-gray-500">No active checkouts found for this user.</p>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+    function toggleAll(source) {
+        checkboxes = document.getElementsByClassName('tx-checkbox');
+        for(var i=0, n=checkboxes.length;i<n;i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+</script>
+{% endblock %}

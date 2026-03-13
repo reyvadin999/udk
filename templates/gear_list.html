@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Equipment Inventory | UDK Mezun{% endblock %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-white">Equipment Inventory</h1>
+        <p class="text-gray-400 mt-2">Manage the club's physical assets and their status.</p>
+    </div>
+    {% if current_user.is_admin_or_manager %}
+    <div>
+        <a href="{{ url_for('gear_add') }}" class="px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-400 text-white rounded-xl shadow-lg transition transform hover:-translate-y-0.5 font-medium">+ New Gear</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Filters -->
+<div class="glass sm:rounded-2xl p-4 mb-8 flex items-center space-x-4 overflow-x-auto">
+    <span class="text-sm font-semibold text-gray-400 whitespace-nowrap">Filter Status:</span>
+    <a href="{{ url_for('gear_list') }}" class="px-3 py-1.5 rounded-lg text-sm font-medium transition {% if not request.args.get('status') %}bg-white/20 text-white{% else %}bg-transparent text-gray-400 hover:text-white hover:bg-white/10{% endif %}">All</a>
+    <a href="{{ url_for('gear_list', status='AVAILABLE') }}" class="px-3 py-1.5 rounded-lg text-sm font-medium transition {% if request.args.get('status') == 'AVAILABLE' %}bg-green-500/20 text-green-400{% else %}bg-transparent text-gray-400 hover:text-white hover:bg-white/10{% endif %}">Available</a>
+    <a href="{{ url_for('gear_list', status='CHECKED_OUT') }}" class="px-3 py-1.5 rounded-lg text-sm font-medium transition {% if request.args.get('status') == 'CHECKED_OUT' %}bg-primary-500/20 text-primary-400{% else %}bg-transparent text-gray-400 hover:text-white hover:bg-white/10{% endif %}">Checked Out</a>
+    <a href="{{ url_for('gear_list', status='MAINTENANCE') }}" class="px-3 py-1.5 rounded-lg text-sm font-medium transition {% if request.args.get('status') == 'MAINTENANCE' %}bg-yellow-500/20 text-yellow-500{% else %}bg-transparent text-gray-400 hover:text-white hover:bg-white/10{% endif %}">Maintenance</a>
+    <a href="{{ url_for('gear_list', status='RETIRED') }}" class="px-3 py-1.5 rounded-lg text-sm font-medium transition {% if request.args.get('status') == 'RETIRED' %}bg-rose-500/20 text-rose-500{% else %}bg-transparent text-gray-400 hover:text-white hover:bg-white/10{% endif %}">Retired</a>
+</div>
+
+<div class="glass overflow-hidden rounded-2xl shadow-xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-400">
+            <thead class="text-xs uppercase bg-white/5 text-gray-300">
+                <tr>
+                    <th scope="col" class="px-6 py-4">Item Name</th>
+                    <th scope="col" class="px-6 py-4">Category</th>
+                    <th scope="col" class="px-6 py-4">Status</th>
+                    <th scope="col" class="px-6 py-4 hidden sm:table-cell">Mfg Date</th>
+                    <th scope="col" class="px-6 py-4 text-right">Details</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/10">
+                {% for item in items %}
+                <tr class="hover:bg-white/5 transition duration-150">
+                    <td class="px-6 py-4 font-medium text-white whitespace-nowrap">{{ item.name }}</td>
+                    <td class="px-6 py-4">{{ item.category.name if item.category else 'Uncategorized' }}</td>
+                    <td class="px-6 py-4">
+                        {% if item.condition_status == 'AVAILABLE' %}
+                            <span class="bg-green-500/10 text-green-400 px-2.5 py-1 rounded-md border border-green-500/20 text-xs font-semibold">AVAILABLE</span>
+                        {% elif item.condition_status == 'CHECKED_OUT' %}
+                            <span class="bg-primary-500/10 text-primary-400 px-2.5 py-1 rounded-md border border-primary-500/20 text-xs font-semibold">CHECKED OUT</span>
+                        {% elif item.condition_status == 'MAINTENANCE' %}
+                            <span class="bg-yellow-500/10 text-yellow-500 px-2.5 py-1 rounded-md border border-yellow-500/20 text-xs font-semibold">MAINTENANCE</span>
+                        {% elif item.condition_status == 'LOST' %}
+                            <span class="bg-gray-500/10 text-gray-400 px-2.5 py-1 rounded-md border border-gray-500/20 text-xs font-semibold">LOST</span>
+                        {% elif item.condition_status == 'RETIRED' %}
+                            <span class="bg-rose-500/10 text-rose-500 px-2.5 py-1 rounded-md border border-rose-500/20 text-xs font-semibold">RETIRED</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 hidden sm:table-cell">{{ item.manufacture_date }}</td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{{ url_for('gear_detail', id=item.id) }}" class="text-primary-400 hover:text-white font-medium hover:underline">View &rarr;</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                        No equipment found matching criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
